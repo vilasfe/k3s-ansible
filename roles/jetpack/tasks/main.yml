@@ -1,0 +1,44 @@
+---
+- name: Perform NVidia Jetpack configuration
+  block:
+    - name: Get latest NVidia docker
+      apt:
+        state: latest
+        name:
+          - nvidia-jetpack
+
+    - name: Append picocluster to docker Group
+      user:
+        name: picocluster
+        groups: docker
+        append: yes
+      register: group
+
+    - name: Make docker use systemd for cgroup management with NVidia container runtime
+      copy:
+        content: |
+          {
+            "storage-driver": "overlay2",
+            "default-runtime": "nvidia",
+            "runtimes": {
+              "nvidia": {
+                "path": "nvidia-container-runtime",
+                "runtimeArgs": []
+              }
+            }
+          }
+        dest: /etc/docker/daemon.json
+        
+    - name: daemon_reload
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart docker with new config file
+      service: 
+        name: docker
+        state: restarted
+        enabled: yes
+
+
+  when:
+    - jetpack is true

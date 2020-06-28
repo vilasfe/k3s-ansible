@@ -8,6 +8,7 @@
     - role: download
     - role: raspbian
     - role: ubuntu
+    - role: jetpack
 
 - hosts: master
   become: yes

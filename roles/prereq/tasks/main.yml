@@ -1,4 +1,14 @@
 ---
+- name: Test for NVidia JetPack
+  block:
+    - stat:
+        path: /etc/nv_tegra_release
+      register: isJetpack
+    - set_fact:
+        jetpack: '{% if
+          (ansible_distribution is match("Ubuntu") and isJetpack.stat.exists)
+          %}true{% else %}false{% endif %}'
+
 - name: Set SELinux to disabled state
   selinux:
     state: disabled
